@@ -1,0 +1,25 @@
+{
+  "name": "poc-idl-embedding",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/web3.js": "^1.95.3",
+    "elfinfo": "0.4.0-beta",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.3",
+    "tsc": "^2.0.4",
+    "typescript": "^5.5.4",
+    "typescript-language-server": "^4.3.3"
+  }
+}

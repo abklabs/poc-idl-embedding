@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+TEMPFILES=()
+
+cleanup () {
+    rm -rf "${TEMPFILES[@]}"
+}
+
+trap cleanup EXIT
+
+PROJECT=counter_anchor
+TARGET=$PROJECT/target
+SHAREDOBJECT=$TARGET/deploy/$PROJECT.so
+MANIFEST=$(mktemp)
+TEMPFILES+=("$MANIFEST")
+
+function add-section () {
+    local section filename
+
+    section=$1 ; shift
+    filename=$1 ; shift
+
+    llvm-objcopy --add-section=${section}=${filename} $SHAREDOBJECT
+}
+
+log::info () {
+    printf "INFO:\t%s\n" "$@"
+}
+
+if [[ -e $SHAREDOBJECT ]] ; then
+    log::info "removing existing shared object $SHAREDOBJECT..."
+    rm -f $SHAREDOBJECT
+fi
+
+(
+    cd $PROJECT
+
+    log::info "syncing keys..."
+    anchor keys sync
+
+    log::info "building $PROJECT anchor project..."
+    anchor build
+)
+
+log::info "creating top-level manifest..."
+cat <<'EOF' > $MANIFEST
+{
+	"sections": {
+		"solana.idl": {
+			"type": "AnchorIDL"
+		}
+	}
+}
+EOF
+
+log::info "patching $PROJECT deployment object with manifest and IDL..."
+add-section solana.manifest $MANIFEST
+add-section solana.idl $TARGET/idl/$PROJECT.json
+
+log::info "done building"
